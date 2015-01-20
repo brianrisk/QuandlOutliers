@@ -49,8 +49,16 @@ public class DataSet {
 		Collections.sort(rows);
 	}
 	
-//	public double getHigh(String title) {
-//		
-//	}
-
+	public double getHigh(String title) {
+		double out = Double.MIN_VALUE;
+		int index = header.getIndexOfTitle(title);
+		for (Row row: rows) {
+			Double value = row.getValue(index);
+			if (value != null) {
+				if (value > out) out = value;
+			}
+		}
+		return out;
+	}
+	
 }
