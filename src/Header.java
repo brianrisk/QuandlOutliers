@@ -17,9 +17,13 @@ public class Header {
 	 */
 	public int getIndexOfTitle(String title) {
 		for (int index = 0; index < titles.length; index++) {
-			if (titles[index].equals("title")) return index;
+			if (titles[index].equals(title)) return index;
 		}
 		return -1;
+	}
+	
+	public int getSize() {
+		return titles.length;
 	}
 	
 	public String toString() {
