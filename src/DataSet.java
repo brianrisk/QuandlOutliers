@@ -4,19 +4,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Hashtable;
-
 
 public class DataSet {
 	
-	public String code;
-	public ArrayList<Row> rows;
+	File dataFile;
+	
 	public Header header;
+	public ArrayList<Row> rows;
 
-	public DataSet(String code, File dir) {
-		this.code = code;
-		loadData(code, dir);
+	
+	public DataSet(File dataFile) {
+		this.dataFile = dataFile;
+		loadData();
 	}
 	
 
@@ -28,9 +27,8 @@ public class DataSet {
 	 * @param code
 	 * @return
 	 */
-	public void loadData(String code, File dir) {
+	public void loadData() {
 		rows = new ArrayList<Row>();
-		File dataFile = new File(dir, code + ".csv");
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(dataFile));
 			String line = br.readLine();
@@ -39,7 +37,7 @@ public class DataSet {
 			line = br.readLine();
 			while (line != null) {
 				Row row = new Row(line);
-				rows.add(row);
+				if (row.isValid()) rows.add(row);
 				line = br.readLine();
 			}
 			br.close();
@@ -49,6 +47,15 @@ public class DataSet {
 		Collections.sort(rows);
 	}
 	
+	public String getName() {
+		return dataFile.getName().substring(0, dataFile.getName().indexOf("."));
+	}
+	
+	/**
+	 * Given a column title, returns the high
+	 * @param title
+	 * @return
+	 */
 	public double getHigh(String title) {
 		double out = Double.MIN_VALUE;
 		int index = header.getIndexOfTitle(title);
