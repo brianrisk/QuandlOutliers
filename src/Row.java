@@ -32,6 +32,10 @@ public class Row implements Comparable<Row>{
 			Double value = null;
 			if (!chunk.isEmpty()) {
 				value = Double.parseDouble(chunk);
+				if (value != null) {
+					// rounding to 5 decimal places
+					value = (double) (Math.round(value * 100000) / 100000.0);
+				}
 			}
 			values.add(value);
 		}

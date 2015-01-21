@@ -32,6 +32,10 @@ public class DataSet {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(dataFile));
 			String line = br.readLine();
+			if (line == null) {
+				br.close();
+				return;
+			}
 			header = new Header(line);
 			
 			line = br.readLine();
