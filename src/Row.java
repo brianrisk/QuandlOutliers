@@ -47,9 +47,7 @@ public class Row implements Comparable<Row>{
 	 * @return
 	 */
 	public Double getValue(int index) {
-		// Subtracting 1 from index as the first column, the date column, 
-		// is not part of the values array
-		return values.get(index - 1);
+		return values.get(index);
 	}
 	
 	
