@@ -51,6 +51,7 @@ public class Row implements Comparable<Row>{
 	 * @return
 	 */
 	public Double getValue(int index) {
+		if (index >= values.size()) return null;
 		return values.get(index);
 	}
 	

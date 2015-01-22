@@ -24,7 +24,7 @@ public class QuandlOutliers {
 				String code = databaseDir.getName();
 				Database database = new Database(code);
 				pw.println("<li><a href='" + code + "/index.html'>" + code + "</a></li>");
-				database.report();
+				database.report2();
 			}
 			pw.println("</ul>");
 			pw.println("</body></html>");

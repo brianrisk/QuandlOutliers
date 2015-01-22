@@ -11,6 +11,7 @@ public class DataSet {
 	
 	public Header header;
 	public ArrayList<Row> rows;
+	boolean isValid = true;
 
 	
 	public DataSet(File dataFile) {
@@ -33,6 +34,7 @@ public class DataSet {
 			BufferedReader br = new BufferedReader(new FileReader(dataFile));
 			String line = br.readLine();
 			if (line == null) {
+				isValid = false;
 				br.close();
 				return;
 			}
@@ -60,9 +62,11 @@ public class DataSet {
 	 * @param title
 	 * @return
 	 */
-	public double getHigh(String title) {
+	public Double getHigh(String title) {
 		double out = Double.MIN_VALUE;
 		int index = header.getIndexOfTitle(title);
+		if (index == -1) return null;
+		if (index >= header.getSize()) return null;
 		for (Row row: rows) {
 			Double value = row.getValue(index);
 			if (value != null) {

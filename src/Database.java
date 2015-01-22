@@ -3,6 +3,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * Database is a collection of data sets
@@ -20,16 +21,14 @@ public class Database {
 		this.code = code;
 		dataDir = new File("data/" + code);
 
-		File [] dataFiles = dataDir.listFiles();
-
-
-		dataSets = new ArrayList<DataSet>();
-		for (File dataFile: dataFiles) {
-			if (dataFile.getName().toLowerCase().endsWith(".csv")) {
-				DataSet dataSet = new DataSet(dataFile);
-				dataSets.add(dataSet);
-			}
-		}
+//		File [] dataFiles = dataDir.listFiles();
+//		dataSets = new ArrayList<DataSet>();
+//		for (File dataFile: dataFiles) {
+//			if (dataFile.getName().toLowerCase().endsWith(".csv")) {
+//				DataSet dataSet = new DataSet(dataFile);
+//				dataSets.add(dataSet);
+//			}
+//		}
 
 
 
@@ -100,7 +99,71 @@ public class Database {
 			e.printStackTrace();
 		}
 
+	}
+	
+	
+	public void report2() {
+		File outputDir = new File("reports/" + code);
+		outputDir.mkdirs();
+		
+		File [] dataFiles = dataDir.listFiles();
+		DataSet firstDataSet = new DataSet(dataFiles[0]);
 
+		try {
+			PrintWriter pw = new PrintWriter(new FileWriter(new File(outputDir, "index.html")));
+			pw.println("<html><head><title>" + code + "</title></head><body>");
+			pw.println("<h1>"+code+"</h1>");
+			
+			// find outliers
+			Hashtable<String, Double> maxValues = new Hashtable<String, Double>();
+			Hashtable<String, String> maxNames = new Hashtable<String, String>();
+			for (File dataFile: dataFiles) {
+				if (!dataFile.getName().toLowerCase().endsWith(".csv")) continue;
+				DataSet dataSet = new DataSet(dataFile);
+				if (!dataSet.isValid) {
+					U.p("invalid: " + dataSet.getName());
+					continue;
+				}
+				for (String title: firstDataSet.header.titles) {
+					Double value = dataSet.getHigh(title);
+					if (value != null) {
+						Double maxValue = maxValues.get(title);
+						if (maxValue == null) maxValue = Double.MIN_VALUE;
+						if (value > maxValue) {
+							maxValues.put(title, value);
+							maxNames.put(title, dataSet.getName());
+						}
+					} else {
+						U.p("bad column index for " + title + ": " + dataSet.getName());
+					}
+				}
+				
+			}
+			
+			// print the table
+			pw.println("<h2>Max values</h2>");
+			pw.println("<table>");
+			for (String title: maxValues.keySet()) {
+				double maxValue = maxValues.get(title);
+				String maxName = maxNames.get(title);
+				maxValue =  (double) Math.round(maxValue * 100000) / 100000;
+				pw.println("<tr>");
+				pw.println("<td>" + title + "</td>");
+				pw.println("<td><a href='https://quandl.com/" + code + "/" + maxName + "'>" + maxName + "</a></td>");
+				pw.println("<td>" + maxValue + "</td>");
+				pw.println("</tr>");
+			}
+			pw.println("</table>");
+
+			
+
+			pw.println("</body></html>");
+			pw.flush();
+			pw.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 
