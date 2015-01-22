@@ -34,75 +34,10 @@ public class Database {
 
 	}
 
+	
+	
+	
 	public void report() {
-		File outputDir = new File("reports/" + code);
-		outputDir.mkdirs();
-		DataSet firstDataSet = dataSets.get(0);
-
-		try {
-			PrintWriter pw = new PrintWriter(new FileWriter(new File(outputDir, "index.html")));
-			pw.println("<html><head><title>" + code + "</title></head><body>");
-
-			pw.println("<h1>"+code+"</h1>");
-
-			pw.println("<h2>Max values</h2>");
-			pw.println("<table>");
-			for (String title: firstDataSet.header.titles) {
-				double maxValue = Double.MIN_VALUE;
-				String maxName = "";
-				for (DataSet dataSet: dataSets) {
-					Double value = dataSet.getHigh(title);
-					if (value != null) {
-						if (value > maxValue) {
-							maxValue = value;
-							maxName = dataSet.getName();
-						}
-					}
-				}
-				maxValue =  (double) Math.round(maxValue * 100000) / 100000;
-				pw.println("<tr>");
-				pw.println("<td>" + title + "</td>");
-				pw.println("<td><a href='https://quandl.com/" + code + "/" + maxName + "'>" + maxName + "</a></td>");
-				pw.println("<td>" + maxValue + "</td>");
-				pw.println("</tr>");
-			}
-			pw.println("</table>");
-
-			pw.println("<h2>Min values</h2>");
-			pw.println("<table>");
-			for (String title: firstDataSet.header.titles) {
-				double minValue = Double.MAX_VALUE;
-				String minName = "";
-				for (DataSet dataSet: dataSets) {
-					Double value = dataSet.getHigh(title);
-					if (value != null) {
-						if (value < minValue) {
-							minValue = value;
-							minName = dataSet.getName();
-						}
-					}
-				}
-				minValue =  (double) Math.round(minValue * 100000) / 100000;
-				pw.println("<tr>");
-				pw.println("<td>" + title + "</td>");
-				pw.println("<td><a href='https://quandl.com/" + code + "/" + minName + "'>" + minName + "</a></td>");
-				pw.println("<td>" + minValue + "</td>");
-				pw.println("</tr>");
-			}
-			pw.println("</table>");
-
-			pw.println("</body></html>");
-			pw.flush();
-			pw.close();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
-	
-	
-	public void report2() {
 		File outputDir = new File("reports/" + code);
 		outputDir.mkdirs();
 		
@@ -114,9 +49,11 @@ public class Database {
 			pw.println("<html><head><title>" + code + "</title></head><body>");
 			pw.println("<h1>"+code+"</h1>");
 			
-			// find outliers
+			// find max outliers
 			Hashtable<String, Double> maxValues = new Hashtable<String, Double>();
 			Hashtable<String, String> maxNames = new Hashtable<String, String>();
+			Hashtable<String, Double> minValues = new Hashtable<String, Double>();
+			Hashtable<String, String> minNames = new Hashtable<String, String>();
 			for (File dataFile: dataFiles) {
 				if (!dataFile.getName().toLowerCase().endsWith(".csv")) continue;
 				DataSet dataSet = new DataSet(dataFile);
@@ -127,11 +64,19 @@ public class Database {
 				for (String title: firstDataSet.header.titles) {
 					Double value = dataSet.getHigh(title);
 					if (value != null) {
+						// max value
 						Double maxValue = maxValues.get(title);
 						if (maxValue == null) maxValue = Double.MIN_VALUE;
 						if (value > maxValue) {
 							maxValues.put(title, value);
 							maxNames.put(title, dataSet.getName());
+						}
+						// min value
+						Double minValue = minValues.get(title);
+						if (minValue == null) minValue = Double.MAX_VALUE;
+						if (value < minValue) {
+							minValues.put(title,  value);
+							minNames.put(title, dataSet.getName());
 						}
 					} else {
 						U.p("bad column index for " + title + ": " + dataSet.getName());
@@ -142,18 +87,9 @@ public class Database {
 			
 			// print the table
 			pw.println("<h2>Max values</h2>");
-			pw.println("<table>");
-			for (String title: maxValues.keySet()) {
-				double maxValue = maxValues.get(title);
-				String maxName = maxNames.get(title);
-				maxValue =  (double) Math.round(maxValue * 100000) / 100000;
-				pw.println("<tr>");
-				pw.println("<td>" + title + "</td>");
-				pw.println("<td><a href='https://quandl.com/" + code + "/" + maxName + "'>" + maxName + "</a></td>");
-				pw.println("<td>" + maxValue + "</td>");
-				pw.println("</tr>");
-			}
-			pw.println("</table>");
+			printTable(pw, maxValues, maxNames);
+			pw.println("<h2>Min values</h2>");
+			printTable(pw, minValues, minNames);
 
 			
 
@@ -165,6 +101,21 @@ public class Database {
 			e.printStackTrace();
 		}
 
+	}
+	
+	private void printTable(PrintWriter pw, Hashtable<String, Double> outlierValues, Hashtable<String, String> outlierNames) {
+		pw.println("<table>");
+		for (String title: outlierValues.keySet()) {
+			double maxValue = outlierValues.get(title);
+			String maxName = outlierNames.get(title);
+			maxValue =  (double) Math.round(maxValue * 100000) / 100000;
+			pw.println("<tr>");
+			pw.println("<td>" + title + "</td>");
+			pw.println("<td><a href='https://quandl.com/" + code + "/" + maxName + "'>" + maxName + "</a></td>");
+			pw.println("<td>" + maxValue + "</td>");
+			pw.println("</tr>");
+		}
+		pw.println("</table>");
 	}
 
 }

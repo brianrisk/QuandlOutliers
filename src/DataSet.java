@@ -76,4 +76,23 @@ public class DataSet {
 		return out;
 	}
 	
+	/**
+	 * Given a column title, returns the low
+	 * @param title
+	 * @return
+	 */
+	public Double getLow(String title) {
+		double out = Double.MAX_VALUE;
+		int index = header.getIndexOfTitle(title);
+		if (index == -1) return null;
+		if (index >= header.getSize()) return null;
+		for (Row row: rows) {
+			Double value = row.getValue(index);
+			if (value != null) {
+				if (value < out) out = value;
+			}
+		}
+		return out;
+	}
+	
 }
